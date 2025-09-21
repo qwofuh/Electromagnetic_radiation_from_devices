@@ -1,0 +1,29 @@
+<html lang="en">
+<head>
+        <link rel="stylesheet" href="/static/styles/calculate_style.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
+        </h1>
+    </header>
+    <h2>Текущий расчет - 2 прибора</h2>
+    <div class="rangeinput">
+        <span>Расстояние(м)</span>
+        <input type="text">
+    </div>
+    <ul>
+        {{ range .orders }}
+        <li>
+            <img src="{{ .Image }}">
+            <span>{{ .Title }}</span>
+            <input type="text">
+            <input type="checkbox" id="checkbox1" name="defaultpower" value="yes">
+            <label for="checkbox1">Использовать типовое значение({{ .AvgPower }})</label>
+        </li>
+        {{ end }}
+    </ul>
+    <span class="footer">© RIP 2025 Boguslavsky Andrey</span>
+</body>
+</html>

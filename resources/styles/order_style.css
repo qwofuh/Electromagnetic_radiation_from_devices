@@ -1,0 +1,72 @@
+body {
+    background-color: white !important;
+}
+
+.footer {
+    position: fixed;
+    bottom: 2;
+    width: 100%;
+    text-align: center;
+}
+
+header img{
+    width: 214px;
+    height: 86px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 41px;
+}
+
+header {
+    display: flex;
+    height: 125px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: white;
+    border-bottom: 1px solid #01A950;
+    position: relative;
+}
+
+.deviceinfo {
+    width: 600px;
+    margin: 20px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    border: 1px solid #01A950;
+}
+
+.deviceinfo h2 {
+    text-align: center;
+    margin: 0 0 25px 0;
+    color: #333;
+    font-size: 28px;
+    padding-bottom: 15px;
+}
+
+.deviceinfo span {
+    display: block;
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    border-left: 4px solid #01A950;
+    line-height: 1.5;
+}
+
+.deviceinfo b {
+    color: #2c3e50;
+    margin-right: 10px;
+}
+
+/* Стили для картинки (если нужно тоже центрировать) */
+img {
+    display: block;
+    margin: 40px auto 30px auto;
+    width: 200px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+}

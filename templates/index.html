@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+        <link rel="stylesheet" href="/static/styles/index_style.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
+        </h1>
+    </header>
+    <form action="/" method="GET">
+        <div class="searchfield">
+            <input type="text" name="query" placeholder="Введите название прибора..." value="{{ .query }}">
+            <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать 
+            введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
+            <button type="submit">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+        <a class="calcuatebutton" href="/calculate">
+            <img src="/static/img/calc.png">
+        </a>
+        <div class="cartcount">2</div>
+</div>
+        </form>
+        
+    <ul>
+        {{ range .orders }}
+        <li>
+            <a href="/order/{{ .ID }}" class="link">
+                <div class="text-content">
+                    <span class="title">{{ .Title }}</span>
+                    <span class="power">Типовая мощность - {{ .AvgPower }}</span>
+                    <span class="distance">Желательное расстояние - {{ .SafeRange }}</span>
+                </div>
+                <img src="{{ .Image }}" alt="device" class="device"/>
+            </a>
+        </li>
+        {{ end }}
+    </ul>
+    <span class="footer">© RIP 2025 Boguslavsky Andrey</span>
+</body>
+</html>
