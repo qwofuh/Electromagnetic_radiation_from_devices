@@ -8,13 +8,13 @@
             <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
         </h1>
     </header>
-    <h2>Текущий расчет - 2 прибора</h2>
+    <h2>Текущий расчет - {{ len .order.Devices }} прибора</h2>
     <div class="rangeinput">
         <span>Расстояние(м)</span>
-        <input type="text" value="5">
+        <input type="text" value="{{ .order.Length }}">
     </div>
     <ul>
-        {{ range .orders }}
+        {{ range .order.Devices }}
         <li>
             <img src="{{ .Image }}">
             <span>{{ .Title }}</span>

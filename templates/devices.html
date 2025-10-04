@@ -20,7 +20,7 @@
                 </svg>
             </button>
         </div>
-        <a class="calcuatebutton" href="/emissions_calculation">
+        <a class="calcuatebutton" href="/emissions_calculation/1">
             <img src="/static/img/calc.png">
         </a>
         <div class="cartcount">2</div>
@@ -28,7 +28,7 @@
         </form>
         
     <ul>
-        {{ range .orders }}
+        {{ range .devices }}
         <li>
             <a href="/order/{{ .ID }}" class="link">
                 <div class="text-content">

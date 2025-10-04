@@ -12,7 +12,7 @@ func NewRepository() (*Repository, error) {
 	return &Repository{}, nil
 }
 
-type Order struct { // вот наша новая структура
+type Device struct { // вот наша новая структура
 	ID               int    // поля структур, которые передаются в шаблон
 	Title            string // ОБЯЗАТЕЛЬНО должны быть написаны с заглавной буквы (то есть публичными)
 	Image            string
@@ -24,9 +24,15 @@ type Order struct { // вот наша новая структура
 	MaxRadiationZone string // Зона максимального излучения
 }
 
-func (r *Repository) GetOrders() ([]Order, error) {
+type Order struct {
+	ID      int
+	Devices []Device
+	Length  int
+}
+
+func (r *Repository) GetDevices() ([]Device, error) {
 	// имитируем работу с БД. Типа мы выполнили sql запрос и получили эти строки из БД
-	orders := []Order{ // массив элементов из наших структур
+	devices := []Device{ // массив элементов из наших структур
 		{
 			ID:               1,
 			Title:            "Холодильник",
@@ -118,40 +124,52 @@ func (r *Repository) GetOrders() ([]Order, error) {
 	}
 	// обязательно проверяем ошибки, и если они появились - передаем выше, то есть хендлеру
 	// тут я снова искусственно обработаю "ошибку" чисто чтобы показать вам как их передавать выше
-	if len(orders) == 0 {
+	if len(devices) == 0 {
 		return nil, fmt.Errorf("массив пустой")
 	}
 
-	return orders, nil
+	return devices, nil
 }
 
-func (r *Repository) GetOrder(id int) (Order, error) {
+func (r *Repository) GetDevice(id int) (Device, error) {
 	// тут у вас будет логика получения нужной услуги, тоже наверное через цикл в первой лабе, и через запрос к БД начиная со второй
-	orders, err := r.GetOrders()
+	devices, err := r.GetDevices()
 	if err != nil {
-		return Order{}, err // тут у нас уже есть кастомная ошибка из нашего метода, поэтому мы можем просто вернуть ее
+		return Device{}, err // тут у нас уже есть кастомная ошибка из нашего метода, поэтому мы можем просто вернуть ее
 	}
 
-	for _, order := range orders {
+	for _, order := range devices {
 		if order.ID == id {
 			return order, nil // если нашли, то просто возвращаем найденный заказ (услугу) без ошибок
 		}
 	}
-	return Order{}, fmt.Errorf("заказ не найден") // тут нужна кастомная ошибка, чтобы понимать на каком этапе возникла ошибка и что произошло
+	return Device{}, fmt.Errorf("заказ не найден") // тут нужна кастомная ошибка, чтобы понимать на каком этапе возникла ошибка и что произошло
 }
 
-func (r *Repository) GetOrdersByTitle(title string) ([]Order, error) {
-	orders, err := r.GetOrders()
+func (r *Repository) GetDeviceByTitle(title string) ([]Device, error) {
+	devices, err := r.GetDevices()
 	if err != nil {
-		return []Order{}, err
+		return []Device{}, err
 	}
 
-	var result []Order
-	for _, order := range orders {
+	var result []Device
+	for _, order := range devices {
 		if strings.Contains(strings.ToLower(order.Title), strings.ToLower(title)) {
 			result = append(result, order)
 		}
 	}
 
 	return result, nil
+}
+
+func (r *Repository) GetOrder() (Order, error) {
+	devices, _ := r.GetDevices()
+
+	order := Order{
+		ID:      1,
+		Devices: []Device{devices[0], devices[1]},
+		Length:  5,
+	}
+
+	return order, nil
 }

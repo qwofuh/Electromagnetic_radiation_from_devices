@@ -28,9 +28,9 @@ ul {
 }
 
 ul li img {
+    height: 150px;
     width: auto;
-    height: 190px;
-    margin-left: 5px;
+    margin: 5 5 5 5;
 }
 
 ul li {

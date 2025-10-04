@@ -24,9 +24,9 @@ func StartServer() {
 	r.LoadHTMLGlob("templates/*")
 	r.Static("/static", "./resources")
 
-	r.GET("/", handler.GetOrders)
-	r.GET("/order/:id", handler.GetOrder) // вот наш новый обработчик
-	r.GET("/emissions_calculation", handler.Calculate)
+	r.GET("/", handler.GetDevices)
+	r.GET("/order/:id", handler.GetDevice) // вот наш новый обработчик
+	r.GET("/emissions_calculation/:id", handler.Calculate_emissions)
 
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 	log.Println("Server down")
