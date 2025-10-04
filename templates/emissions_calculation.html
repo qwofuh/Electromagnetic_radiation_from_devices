@@ -11,16 +11,16 @@
     <h2>Текущий расчет - 2 прибора</h2>
     <div class="rangeinput">
         <span>Расстояние(м)</span>
-        <input type="text">
+        <input type="text" value="5">
     </div>
     <ul>
         {{ range .orders }}
         <li>
             <img src="{{ .Image }}">
             <span>{{ .Title }}</span>
-            <input type="text">
-            <input type="checkbox" id="checkbox1" name="defaultpower" value="yes">
-            <label for="checkbox1">Использовать типовое значение({{ .AvgPower }})</label>
+            <input type="text" value="{{ .AvgMaxPower }}">
+            <input type="checkbox" id="checkbox1" name="defaultpower" value="yes" checked>
+            <label for="checkbox1">Использовать максимальное типовое значение({{ .AvgMaxPower }} Вт)</label>
         </li>
         {{ end }}
     </ul>

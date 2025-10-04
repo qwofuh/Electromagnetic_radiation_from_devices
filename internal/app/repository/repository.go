@@ -16,7 +16,8 @@ type Order struct { // вот наша новая структура
 	ID               int    // поля структур, которые передаются в шаблон
 	Title            string // ОБЯЗАТЕЛЬНО должны быть написаны с заглавной буквы (то есть публичными)
 	Image            string
-	AvgPower         string // Типовая мощность
+	AvgMinPower      float64 // Типовая мощность
+	AvgMaxPower      int
 	SafeRange        string // Безопасное расстояние
 	RadiationType    string // Тип излучения
 	RadiationSource  string // Источник излучения
@@ -30,7 +31,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               1,
 			Title:            "Холодильник",
 			Image:            "http://127.0.0.1:9000/devices/FridgeMain.png",
-			AvgPower:         "100-300 Вт",
+			AvgMinPower:      100,
+			AvgMaxPower:      300,
 			SafeRange:        "0.5-1 м",
 			RadiationType:    "низкочастотное электромагнитное поле",
 			RadiationSource:  "компрессор, блок управления",
@@ -40,7 +42,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               2,
 			Title:            "СВЧ-печь",
 			Image:            "http://127.0.0.1:9000/devices/SVCH.jpeg",
-			AvgPower:         "800-1200 Вт",
+			AvgMinPower:      800,
+			AvgMaxPower:      1200,
 			SafeRange:        "1-2 м",
 			RadiationType:    "СВЧ-излучение",
 			RadiationSource:  "магнетрон",
@@ -50,7 +53,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               3,
 			Title:            "WIFI-роутер",
 			Image:            "http://127.0.0.1:9000/devices/wifi.avif",
-			AvgPower:         "0.1-1 Вт",
+			AvgMinPower:      0.1,
+			AvgMaxPower:      1,
 			SafeRange:        "2-5 м",
 			RadiationType:    "радиочастотное",
 			RadiationSource:  "антенны, передатчик",
@@ -60,7 +64,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               4,
 			Title:            "Телевизор",
 			Image:            "http://127.0.0.1:9000/devices/TV.jpg",
-			AvgPower:         "50-200 Вт",
+			AvgMinPower:      50,
+			AvgMaxPower:      200,
 			SafeRange:        "2-3 м",
 			RadiationType:    "низкочастотное магнитное поле",
 			RadiationSource:  "блок питания, задняя панель",
@@ -70,7 +75,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               5,
 			Title:            "Стиральная машина",
 			Image:            "http://127.0.0.1:9000/devices/CleaningMachine.png",
-			AvgPower:         "1500-2500 Вт",
+			AvgMinPower:      1500,
+			AvgMaxPower:      2500,
 			SafeRange:        "1-2 м",
 			RadiationType:    "низкочастотное магнитное поле",
 			RadiationSource:  "электродвигатель, ТЭН",
@@ -80,7 +86,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               6,
 			Title:            "Компьютер",
 			Image:            "http://127.0.0.1:9000/devices/PK.jpeg",
-			AvgPower:         "300-800 Вт",
+			AvgMinPower:      300,
+			AvgMaxPower:      800,
 			SafeRange:        "0.5-1 м",
 			RadiationType:    "низкочастотное магнитное поле",
 			RadiationSource:  "блок питания",
@@ -90,7 +97,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               7,
 			Title:            "Индукционная плита",
 			Image:            "http://127.0.0.1:9000/devices/induct.jpg",
-			AvgPower:         "2000-3500 Вт",
+			AvgMinPower:      2000,
+			AvgMaxPower:      3500,
 			SafeRange:        "0.5-1 м",
 			RadiationType:    "низкочастотное магнитное поле",
 			RadiationSource:  "медные катушки под стеклокерамической поверзностью",
@@ -100,7 +108,8 @@ func (r *Repository) GetOrders() ([]Order, error) {
 			ID:               8,
 			Title:            "Посудомоечная машина",
 			Image:            "http://127.0.0.1:9000/devices/posudomoyka.jpeg",
-			AvgPower:         "1800-2200 Вт",
+			AvgMinPower:      1800,
+			AvgMaxPower:      2200,
 			SafeRange:        "1-1.5 м",
 			RadiationType:    "низкочастотное магнитное поле",
 			RadiationSource:  "блок управления, нагревательный элемент, двигатель",

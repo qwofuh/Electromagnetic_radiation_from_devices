@@ -10,7 +10,7 @@
     </header>
     <form action="/" method="GET">
         <div class="searchfield">
-            <input type="text" name="query" placeholder="Введите название прибора..." value="{{ .query }}">
+            <input type="text" name="device_search" placeholder="Введите название прибора..." value="{{ .query }}">
             <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать 
             введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
             <button type="submit">
@@ -20,7 +20,7 @@
                 </svg>
             </button>
         </div>
-        <a class="calcuatebutton" href="/calculate">
+        <a class="calcuatebutton" href="/emissions_calculation">
             <img src="/static/img/calc.png">
         </a>
         <div class="cartcount">2</div>
@@ -33,7 +33,7 @@
             <a href="/order/{{ .ID }}" class="link">
                 <div class="text-content">
                     <span class="title">{{ .Title }}</span>
-                    <span class="power">Типовая мощность - {{ .AvgPower }}</span>
+                    <span class="power">Типовая мощность - {{ .AvgMinPower }}-{{ .AvgMaxPower }} Вт</span>
                     <span class="distance">Желательное расстояние - {{ .SafeRange }}</span>
                 </div>
                 <img src="{{ .Image }}" alt="device" class="device"/>

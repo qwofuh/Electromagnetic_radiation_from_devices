@@ -24,8 +24,8 @@ func (h *Handler) GetOrders(ctx *gin.Context) {
 	var orders []repository.Order
 	var err error
 
-	searchQuery := ctx.Query("query") // получаем значение из поля поиска
-	if searchQuery == "" {            // если поле поиска пусто, то просто получаем из репозитория все записи
+	searchQuery := ctx.Query("device_search") // получаем значение из поля поиска
+	if searchQuery == "" {                    // если поле поиска пусто, то просто получаем из репозитория все записи
 		orders, err = h.Repository.GetOrders()
 		if err != nil {
 			logrus.Error(err)
@@ -37,10 +37,10 @@ func (h *Handler) GetOrders(ctx *gin.Context) {
 		}
 	}
 
-	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"time":   time.Now().Format("15:04:05"),
-		"orders": orders,
-		"query":  searchQuery, // передаем введенный запрос обратно на страницу
+	ctx.HTML(http.StatusOK, "devices.html", gin.H{
+		"time":          time.Now().Format("15:04:05"),
+		"orders":        orders,
+		"device_search": searchQuery, // передаем введенный запрос обратно на страницу
 		// в ином случае оно будет очищаться при нажатии на кнопку
 	})
 }
@@ -79,7 +79,7 @@ func (h *Handler) Calculate(ctx *gin.Context) {
 	}
 	orders = append(orders, order2)
 
-	ctx.HTML(http.StatusOK, "calculate.html", gin.H{
+	ctx.HTML(http.StatusOK, "emissions_calculation.html", gin.H{
 		"orders": orders,
 	})
 }
