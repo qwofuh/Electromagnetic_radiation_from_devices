@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+        <link rel="stylesheet" href="/static/styles/calculate_style.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
+        </h1>
+    </header>
+    <h2>Текущий расчет - {{ len .device }} прибора</h2>
+    <div class="rangeinput">
+        <span>Расстояние(м)</span>
+        <input type="text" value="">
+    </div>
+    <ul>
+        {{ range .device}}
+        <li>
+            <img src="{{ .Device.Image }}">
+            <span>{{ .Device.Title }}</span>
+            <input type="text" value="{{ .Device.AvgMaxPower }}">
+            <input type="checkbox" id="checkbox1" name="defaultpower" value="yes" checked>
+            <label for="checkbox1">Использовать максимальное типовое значение({{ .Device.AvgMaxPower }} Вт)</label>
+        </li>
+        {{ end }}
+    </ul>
+
+    {{if gt .order.ID 0}}
+        <div class="order-actions" style="margin-top:20px;">
+            <form action="/orders/delete/{{.order.ID}}" method="post">
+                <button class="delete-button">Удалить заявку</button>
+            </form>
+        </div>
+    {{end}}
+</body>
+</html>

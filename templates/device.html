@@ -1,0 +1,21 @@
+<html lang="en">
+<head>
+        <link rel="stylesheet" href="/static/styles/device_style.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
+        </h1>
+    </header>
+    <img src="{{ .device.Image }}">
+    <div class="deviceinfo">
+        <h2>{{ .device.Title }}</h2>
+        <span><b>Тип излучения:</b>{{ .device.RadiationType }}</span>
+        <span><b>Источник излучения:</b>{{ .device.RadiationSource }}</span>
+        <span><b>Зона максимального излучения:</b>{{ .device.MaxRadiationZone }}</span>
+        <span><b>Типовая мощность:</b>{{ .device.AvgMinPower }}-{{ .device.AvgMaxPower }} Вт</span>
+    </div>
+    <span class="footer">© RIP 2025 Boguslavsky Andrey</span>
+</body>
+</html>
