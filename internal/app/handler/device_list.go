@@ -27,10 +27,10 @@ func (h *Handler) GetDevices(ctx *gin.Context) {
 	}
 
 	// Для примера используем userID = 1
-	userID := 1
+	userID, _ := h.getUserFromContext(ctx)
 
 	// Ищем черновой заказ пользователя
-	order, err := h.Repository.GetDraftOrder(userID)
+	order, err := h.Repository.GetDraftOrder(ctx.Request.Context(), userID)
 	var orderCount int64 = 0
 	if err != nil {
 		logrus.Warn("Не удалось получить черновой заказ: ", err)
@@ -71,24 +71,24 @@ func (h *Handler) AddDeviceToDraftOrder(ctx *gin.Context) {
 		return
 	}
 
-	userID := 1
+	userID, _ := h.getUserFromContext(ctx)
 
 	// Получаем черновой заказ
-	order, err := h.Repository.GetDraftOrder(userID)
+	order, err := h.Repository.GetDraftOrder(ctx.Request.Context(), userID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
 
 	if order == nil {
-		order, err = h.Repository.CreateDraftOrder(userID)
+		order, err = h.Repository.CreateDraftOrder(ctx.Request.Context(), userID)
 		if err != nil {
 			h.errorHandler(ctx, http.StatusInternalServerError, err)
 			return
 		}
 	}
 
-	if err := h.Repository.AddDeviceToOrder(order.ID, deviceID); err != nil {
+	if err := h.Repository.AddDeviceToOrder(ctx.Request.Context(), order.ID, deviceID); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -108,7 +108,9 @@ func (h *Handler) GetDevicesOrder(ctx *gin.Context) {
 
 	// Если id == 0 — отвечаем унифицированным сообщением, не перенаправляя/не показывая внутреннюю ошибку
 	if id == 0 {
-		ctx.Redirect(http.StatusSeeOther, "/")
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"description": "заказ не найден или удален",
+		})
 		return
 	}
 
@@ -118,8 +120,11 @@ func (h *Handler) GetDevicesOrder(ctx *gin.Context) {
 		return
 	}
 
+	// Если статус заказа не черновик, считаем, что заказа нет/он удалён
 	if order.Status != "черновик" {
-		ctx.Redirect(http.StatusSeeOther, "/")
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"description": "заказ не найден или удален",
+		})
 		return
 	}
 
@@ -146,13 +151,12 @@ func (h *Handler) GetDeviceAPI(ctx *gin.Context) {
 	if device == nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
 			"status":      "error",
-			"description": "материал не найден",
+			"description": "устройство не найдено",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"device": device,
 	})
 }
@@ -168,7 +172,6 @@ func (h *Handler) GetDevicesAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"devices": devices,
 	})
 }
@@ -217,7 +220,6 @@ func (h *Handler) UpdateDeviceAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"device": input,
 	})
 }
@@ -238,7 +240,6 @@ func (h *Handler) DeleteDeviceAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"message": "устройство успешно скрыто",
 	})
 }
@@ -253,11 +254,10 @@ func (h *Handler) AddDeviceToDraftOrderAPI(ctx *gin.Context) {
 		return
 	}
 
-	// Для примера используем userID = 1
-	userID := 1
+	userID, _ := h.getUserFromContext(ctx)
 
 	// Получаем черновой заказ пользователя
-	order, err := h.Repository.GetDraftOrder(userID)
+	order, err := h.Repository.GetDraftOrder(ctx.Request.Context(), userID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -265,7 +265,7 @@ func (h *Handler) AddDeviceToDraftOrderAPI(ctx *gin.Context) {
 
 	// Если чернового заказа нет — создаём новый
 	if order == nil {
-		order, err = h.Repository.CreateDraftOrder(userID)
+		order, err = h.Repository.CreateDraftOrder(ctx.Request.Context(), userID)
 		if err != nil {
 			h.errorHandler(ctx, http.StatusInternalServerError, err)
 			return
@@ -273,7 +273,7 @@ func (h *Handler) AddDeviceToDraftOrderAPI(ctx *gin.Context) {
 	}
 
 	// Добавляем материал в заказ
-	if err := h.Repository.AddDeviceToOrder(order.ID, deviceID); err != nil {
+	if err := h.Repository.AddDeviceToOrder(ctx.Request.Context(), order.ID, deviceID); err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
 	}
@@ -282,7 +282,6 @@ func (h *Handler) AddDeviceToDraftOrderAPI(ctx *gin.Context) {
 	count, _ := h.Repository.GetOrderDevicesCount(order.ID)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "success",
 		"message":   "устройство добавлено в черновой заказ",
 		"orderID":   order.ID,
 		"itemCount": count,

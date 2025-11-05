@@ -31,6 +31,7 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 	// ---------------------------
 	router.GET("/api/devices", h.GetDevicesAPI)
 	router.GET("/device/:id", h.GetDevice)
+	router.GET("/api/device/:id", h.GetDeviceAPI)
 	router.POST("/sign_up", h.Register)
 	router.POST("/api/users/login", h.LoginUserAPI)
 	router.POST("/api/users/logout", h.LogoutUserAPI)
@@ -47,7 +48,6 @@ func (h *Handler) RegisterHandler(router *gin.Engine) {
 
 		// Устройства и заказы (все методы кроме админских)
 		auth.GET("/devices/:id", h.GetDevicesOrder)
-		auth.GET("/api/device/:id", h.GetDeviceAPI)
 		auth.POST("/emissions_calculation/draft/add/:id", h.AddDeviceToDraftOrderAPI)
 		auth.GET("/emissions_calculation", h.GetOrdersAPI)
 		auth.GET("/emissions_calculation/:id", h.GetOrderWithDevicesAPI)
@@ -86,4 +86,23 @@ func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error)
 		"status":      "error",
 		"description": err.Error(),
 	})
+}
+
+// getUserFromContext извлекает ID и роль пользователя из gin.Context
+// Возвращает userID и role (int), при отсутствии — нули
+func (h *Handler) getUserFromContext(ctx *gin.Context) (int, int) {
+	uid, _ := ctx.Get("userID")
+	rid, _ := ctx.Get("role")
+
+	userID := 0
+	if v, ok := uid.(int); ok {
+		userID = v
+	}
+
+	roleID := 0
+	if r, ok := rid.(int); ok {
+		roleID = r
+	}
+
+	return userID, roleID
 }

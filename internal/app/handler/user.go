@@ -16,7 +16,7 @@ import (
 // Register godoc
 // @Summary      Регистрация нового пользователя
 // @Description  Регистрирует нового пользователя с логином, паролем и (опционально) ролью.
-// @Tags         auth
+// @Tags         Управление пользователями
 // @Accept       json
 // @Produce      json
 // @Param        request  body      ds.RegisterReq  true  "Данные нового пользователя"

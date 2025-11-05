@@ -30,11 +30,11 @@ func (h *Handler) DeleteDeviceOrder(ctx *gin.Context) {
 
 // GET /api/orders/draft/cart
 func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
-	// Пока без авторизации — используем userID = 1
-	userID := 1
+
+	userID, _ := h.getUserFromContext(ctx)
 
 	// Ищем черновик
-	order, err := h.Repository.GetDraftOrder(userID)
+	order, err := h.Repository.GetDraftOrder(ctx.Request.Context(), userID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusInternalServerError, err)
 		return
@@ -43,7 +43,6 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 	if order == nil {
 		// Если черновика нет — возвращаем пустую корзину
 		ctx.JSON(http.StatusOK, gin.H{
-			"status":    "success",
 			"orderID":   0,
 			"itemCount": 0,
 		})
@@ -58,7 +57,6 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "success",
 		"orderID":   order.ID,
 		"itemCount": count,
 	})
@@ -67,7 +65,7 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 // GetOrdersAPI godoc
 // @Summary      Получить список заказов
 // @Description  Возвращает список заказов с возможностью фильтрации по статусу и диапазону дат. Разрешённые статусы: "сформирован", "завершен", "отклонен".
-// @Tags         orders
+// @Tags         Заявки с устройствами
 // @Accept       json
 // @Produce      json
 // @Param        status  query     string  false  "Статус заказа (сформирован, завершен, отклонен), можно указать несколько через запятую"
@@ -79,15 +77,13 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 // @Router       /api/orders [get]
 
 func (h *Handler) GetOrdersAPI(ctx *gin.Context) {
+	status := ctx.Query("status")
 	start := ctx.Query("start")
 	end := ctx.Query("end")
 
-	fixedStatuses := ctx.Query("status")
-	if fixedStatuses == "" {
-		fixedStatuses = "завершен,отклонен,отменен"
-	}
+	userID, _ := h.getUserFromContext(ctx)
 
-	orders, err := h.Repository.GetOrdersFiltered(fixedStatuses, start, end)
+	orders, err := h.Repository.GetOrdersFilteredForUser(ctx.Request.Context(), status, start, end, userID)
 	if err != nil {
 		if err.Error() == "not_found" {
 			ctx.JSON(http.StatusNotFound, gin.H{
@@ -100,7 +96,6 @@ func (h *Handler) GetOrdersAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"orders": orders,
 	})
 }
@@ -116,6 +111,18 @@ func (h *Handler) GetOrderWithDevicesAPI(ctx *gin.Context) {
 	order, devices, err := h.Repository.GetOrderByID(orderID)
 	if err != nil {
 		h.errorHandler(ctx, http.StatusNotFound, err)
+		return
+	}
+
+	// Проверяем, что запрашиваемый заказ принадлежит текущему пользователю или пользователь — Admin
+	userID, roleID := h.getUserFromContext(ctx)
+	isAdmin := false
+	if roleID == 2 { // role.Admin == 2
+		isAdmin = true
+	}
+	if !isAdmin && order.CreatorID != userID {
+		// не владелец и не админ — запрещено
+		ctx.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 
@@ -139,7 +146,7 @@ func (h *Handler) GetOrderWithDevicesAPI(ctx *gin.Context) {
 	resp := ds.EmissionWithDevices{
 		ID:            order.ID,
 		CreatorID:     order.CreatorID,
-		ModeratorID:   &order.ModeratorID,
+		ModeratorID:   order.ModeratorID,
 		Status:        order.Status,
 		Distance:      order.Distance,
 		TotalEmission: order.TotalEmission,
@@ -150,8 +157,7 @@ func (h *Handler) GetOrderWithDevicesAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  resp,
+		"order": resp,
 	})
 }
 
@@ -203,8 +209,7 @@ func (h *Handler) UpdateDeviceOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  order,
+		"order": order,
 	})
 }
 
@@ -229,8 +234,7 @@ func (h *Handler) FormDeviceOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  order,
+		"order": order,
 	})
 }
 
@@ -260,7 +264,6 @@ func (h *Handler) CompleteOrRejectOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"order":   order,
 		"devices": devices,
 	})
@@ -281,7 +284,6 @@ func (h *Handler) DeleteDevicesOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"orderID": orderID,
 	})
 }

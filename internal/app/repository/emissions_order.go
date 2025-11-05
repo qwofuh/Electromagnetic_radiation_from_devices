@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 	"lab1/internal/app/ds"
 	"math"
@@ -166,4 +167,58 @@ func (r *Repository) SoftDeleteOrder(orderID int) error {
 	}
 
 	return r.db.Model(&ds.Emission{}).Where("id = ?", orderID).Updates(updates).Error
+}
+
+// GetOrdersFilteredForUser возвращает заказы указанного пользователя (creator_id = userID)
+func (r *Repository) GetOrdersFilteredForUser(ctx context.Context, status, start, end string, userID int) ([]ds.EmissionResponse, error) {
+	var orders []ds.EmissionResponse
+
+	// Разрешённые статусы для выдачи
+	allowedStatuses := map[string]bool{
+		"сформирован": true,
+		"завершен":    true,
+		"отклонен":    true,
+	}
+
+	query := r.db.WithContext(ctx).
+		Table("emissions").
+		Select(`emissions.id, 
+				emissions.status, 
+				emissions.create_at, 
+				emissions.update_at, 
+				emissions.finish_at, 
+				u1.login as moderator, 
+				u2.login as creator`).
+		Joins("LEFT JOIN users u1 ON u1.id = mo.moderator_id").
+		Joins("LEFT JOIN users u2 ON u2.id = mo.creator_id").
+		Where("emissions.creator_id = ?", userID)
+
+	// фильтр по статусу
+	if status != "" {
+		statuses := []string{}
+		for _, s := range strings.Split(status, ",") {
+			s = strings.TrimSpace(s)
+			if allowedStatuses[s] { // оставляем только разрешённые
+				statuses = append(statuses, s)
+			}
+		}
+		if len(statuses) == 0 {
+			return []ds.EmissionResponse{}, nil
+		}
+		query = query.Where("emissions.status IN ?", statuses)
+	} else {
+		// Если статус не указан — выдаём все разрешённые статусы
+		query = query.Where("emissions.status IN ?", []string{"сформирован", "завершен", "отклонен"})
+	}
+
+	// фильтр по диапазону дат
+	if start != "" && end != "" {
+		query = query.Where("emissions.create_at BETWEEN ? AND ?", start, end)
+	}
+
+	if err := query.Scan(&orders).Error; err != nil {
+		return nil, fmt.Errorf("ошибка при получении заказов: %w", err)
+	}
+
+	return orders, nil
 }

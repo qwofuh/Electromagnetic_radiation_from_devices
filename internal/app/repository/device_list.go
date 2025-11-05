@@ -37,9 +37,9 @@ func (r *Repository) GetDeviceByTitle(title string) ([]ds.Device, error) {
 }
 
 // Получаем черновой заказ пользователя
-func (r *Repository) GetDraftOrder(userID int) (*ds.Emission, error) {
+func (r *Repository) GetDraftOrder(ctx context.Context, userID int) (*ds.Emission, error) {
 	var order ds.Emission
-	err := r.db.Where("creator_id = ? AND status = ?", userID, "черновик").First(&order).Error
+	err := r.db.WithContext(ctx).Where("creator_id = ? AND status = ?", userID, "черновик").First(&order).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil // черновик отсутствует
@@ -50,22 +50,22 @@ func (r *Repository) GetDraftOrder(userID int) (*ds.Emission, error) {
 }
 
 // Создаём новый черновой заказ
-func (r *Repository) CreateDraftOrder(userID int) (*ds.Emission, error) {
+func (r *Repository) CreateDraftOrder(ctx context.Context, userID int) (*ds.Emission, error) {
 	order := ds.Emission{
 		CreatorID:   userID,
-		ModeratorID: 1,
+		ModeratorID: nil,
 		Status:      "черновик",
 	}
-	if err := r.db.Create(&order).Error; err != nil {
+	if err := r.db.WithContext(ctx).Create(&order).Error; err != nil {
 		return nil, err
 	}
 	return &order, nil
 }
 
 // Добавляем устройсктво в расчет, если его там нет
-func (r *Repository) AddDeviceToOrder(orderID int, deviceID int) error {
+func (r *Repository) AddDeviceToOrder(ctx context.Context, orderID int, deviceID int) error {
 	var count int64
-	err := r.db.Model(&ds.DeviceEmissionCalculation{}).Where("emission_id = ? AND device_id = ?", orderID, deviceID).Count(&count).Error
+	err := r.db.WithContext(ctx).Model(&ds.DeviceEmissionCalculation{}).Where("emission_id = ? AND device_id = ?", orderID, deviceID).Count(&count).Error
 	if err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (r *Repository) AddDeviceToOrder(orderID int, deviceID int) error {
 			Valid:   false,
 		},
 	}
-	return r.db.Create(&item).Error
+	return r.db.WithContext(ctx).Create(&item).Error
 }
 
 // Получаем количество устройств в заказе

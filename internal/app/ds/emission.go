@@ -14,7 +14,7 @@ type Emission struct {
 	Distance      float64      `gorm:"type:numeric(10,2)"`
 	TotalEmission float64      `gorm:"type:numeric(10,2)"`
 	CreatorID     int          `gorm:"not null"`
-	ModeratorID   int
+	ModeratorID   *int
 
 	Creator   User `gorm:"foreignKey:CreatorID"`
 	Moderator User `gorm:"foreignKey:ModeratorID"`
