@@ -43,7 +43,6 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 	if order == nil {
 		// Если черновика нет — возвращаем пустую корзину
 		ctx.JSON(http.StatusOK, gin.H{
-			"status":    "success",
 			"orderID":   0,
 			"itemCount": 0,
 		})
@@ -58,9 +57,9 @@ func (h *Handler) GetDraftCartAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "success",
-		"orderID":   order.ID,
-		"itemCount": count,
+		"orderID":             order.ID,
+		"itemCount":           count,
+		"order.TotalEmission": order.TotalEmission,
 	})
 }
 
@@ -86,7 +85,6 @@ func (h *Handler) GetOrdersAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"orders": orders,
 	})
 }
@@ -136,8 +134,7 @@ func (h *Handler) GetOrderWithDevicesAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  resp,
+		"order": resp,
 	})
 }
 
@@ -189,8 +186,7 @@ func (h *Handler) UpdateDeviceOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  order,
+		"order": order,
 	})
 }
 
@@ -215,8 +211,7 @@ func (h *Handler) FormDeviceOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
-		"order":  order,
+		"order": order,
 	})
 }
 
@@ -246,7 +241,6 @@ func (h *Handler) CompleteOrRejectOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"order":   order,
 		"devices": devices,
 	})
@@ -267,7 +261,6 @@ func (h *Handler) DeleteDevicesOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"orderID": orderID,
 	})
 }

@@ -31,7 +31,6 @@ func (h *Handler) RegisterUserAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"status": "success",
 		"user": gin.H{
 			"id":           user.ID,
 			"login":        user.Login,
@@ -58,7 +57,6 @@ func (h *Handler) LoginUserAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"user": gin.H{
 			"id":           user.ID,
 			"login":        user.Login,

@@ -118,7 +118,7 @@ func (h *Handler) GetDevicesOrder(ctx *gin.Context) {
 		return
 	}
 
-	if order.Status != "черновик" {
+	if order.Status == "удален" {
 		ctx.Redirect(http.StatusSeeOther, "/")
 		return
 	}
@@ -145,14 +145,12 @@ func (h *Handler) GetDeviceAPI(ctx *gin.Context) {
 	}
 	if device == nil {
 		ctx.JSON(http.StatusNotFound, gin.H{
-			"status":      "error",
-			"description": "материал не найден",
+			"description": "устройство не найдено",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"device": device,
 	})
 }
@@ -168,7 +166,6 @@ func (h *Handler) GetDevicesAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"devices": devices,
 	})
 }
@@ -190,7 +187,6 @@ func (h *Handler) CreateDeviceAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"status": "success",
 		"device": input,
 	})
 }
@@ -217,7 +213,6 @@ func (h *Handler) UpdateDeviceAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status": "success",
 		"device": input,
 	})
 }
@@ -238,7 +233,6 @@ func (h *Handler) DeleteDeviceAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":  "success",
 		"message": "устройство успешно скрыто",
 	})
 }
@@ -282,7 +276,6 @@ func (h *Handler) AddDeviceToDraftOrderAPI(ctx *gin.Context) {
 	count, _ := h.Repository.GetOrderDevicesCount(order.ID)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "success",
 		"message":   "устройство добавлено в черновой заказ",
 		"orderID":   order.ID,
 		"itemCount": count,

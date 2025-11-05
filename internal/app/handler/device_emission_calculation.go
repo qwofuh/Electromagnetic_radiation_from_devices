@@ -30,7 +30,6 @@ func (h *Handler) DeleteDeviceFromOrderAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":    "success",
 		"device_id": deviceID,
 		"order_id":  orderID,
 		"message":   "устройство удалено из расчета",
@@ -68,7 +67,6 @@ func (h *Handler) UpdateCustomPowerAPI(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"status":       "success",
 		"device_id":    deviceID,
 		"order_id":     orderID,
 		"custom_power": req.CustomPower,
