@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+        <link rel="stylesheet" href="/static/styles/index_style.css">
+</head>
+<body>
+    <header>
+        <h1>
+            <a href="/"><img src="/static/img/mainpict.png" alt="home"></a>
+        </h1>
+    </header>
+    <form action="/" method="GET">
+        <div class="searchfield">
+            <input type="text" name="device_search" placeholder="Введите название прибора..." value="{{ .query }}">
+            <!-- value="{{ .query }}"  нужно для того, чтобы из обработчика передавать 
+            введенный запрос обратно на страницу. Тем самым введенный текст в поле поиска будет сохраняться-->
+            <button type="submit">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+        </div>
+        <a class="calcuatebutton" href="/emissions_calculation/{{ .orderID }}">
+            <img src="/static/img/calc.png">
+        </a>
+        <div class="cartcount">{{ .orderCount }}</div>
+</div>
+        </form>
+        
+    <ul>
+        {{ range .devices }}
+        <li>
+            <a href="/device/{{ .ID }}" class="link">
+                <div class="text-content">
+                    <span class="title">{{ .Title }}</span>
+                    <span class="power">Типовая мощность - {{ printf "%.0f" .AvgMinPower }}-{{ printf "%.0f" .AvgMaxPower }} Вт</span>
+                    <span class="distance">Желательное расстояние - {{ printf "%.1f" .MinSafeRange }} м</span>
+                    <form action="/emissions_calculation/draft/add/{{.ID}}" method="post">
+                        <button class="add-to-calc">Добавить к расчету</button>
+                    </form>
+                </div>
+                <img src="{{ .Image }}" alt="device" class="device"/>
+            </a>
+        </li>
+        {{ end }}
+    </ul>
+    <span class="footer">© RIP 2025 Boguslavsky Andrey</span>
+</body>
+</html>

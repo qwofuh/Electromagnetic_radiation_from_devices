@@ -1,0 +1,10 @@
+ServiceHost = "0.0.0.0"
+ServicePort = 8080
+
+[redis]
+host = "localhost"
+port = 6378
+user = ""
+password = "password"
+dialtimeout = "5s"
+readtimeout = "3s"

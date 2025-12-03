@@ -1,0 +1,912 @@
+basePath: /
+definitions:
+  ds.Device:
+    properties:
+      avgMaxPower:
+        type: number
+      avgMinPower:
+        type: number
+      id:
+        type: integer
+      image:
+        type: string
+      maxRadiationZone:
+        type: string
+      maxSafeRange:
+        type: number
+      minSafeRange:
+        type: number
+      radiationSource:
+        type: string
+      radiationType:
+        type: string
+      title:
+        type: string
+      visability:
+        type: boolean
+    type: object
+  ds.EmissionCompleteRequest:
+    properties:
+      moderator_id:
+        type: integer
+      status:
+        enum:
+        - завершен
+        - отклонен
+        type: string
+    required:
+    - moderator_id
+    - status
+    type: object
+  ds.EmissionListResponse:
+    properties:
+      orders:
+        items:
+          $ref: '#/definitions/ds.EmissionResponse'
+        type: array
+      status:
+        example: success
+        type: string
+    type: object
+  ds.EmissionResponse:
+    properties:
+      create_at:
+        type: string
+      distance:
+        type: number
+      finish_at:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      total_emission:
+        type: number
+      update_at:
+        type: string
+    type: object
+  ds.EmissionUpdateRequest:
+    properties:
+      distance:
+        type: number
+    type: object
+  ds.ErrorResponse:
+    properties:
+      error:
+        example: Некорректный токен
+        type: string
+    type: object
+  ds.LoginReq:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  ds.LoginResponse:
+    properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+        type: string
+      expires_in:
+        description: время жизни токена (в секундах)
+        example: 3600
+        type: integer
+      token_type:
+        example: Bearer
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API сервиса аутентификации с Redis и JWT. Поддерживает роли пользователей
+    и администраторов.
+  title: Device emission Service API
+  version: "1.0"
+paths:
+  /api/device:
+    post:
+      consumes:
+      - application/json
+      description: Создает новое устройство с указанными параметрами. Доступно только
+        администраторам
+      parameters:
+      - description: Данные нового устройства
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.Device'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Устройство успешно создано
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректные данные устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (требуется роль Admin)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при создании устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Создать новое устройство
+      tags:
+      - Устройства
+  /api/device/:id:
+    get:
+      description: Возвращает информацию об устройстве по его идентификатору
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными устройства
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Устройство не найдено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка на сервере
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить устройство по ID
+      tags:
+      - Устройства
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные существующего устройства по его ID. Доступно только
+        администраторам
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Обновленные данные устройства
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.Device'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Устройство успешно обновлено
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID или данные устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (требуется роль Admin)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при обновлении устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить устройство
+      tags:
+      - Устройства
+  /api/device/:id/delete:
+    post:
+      description: Помечает устройство как скрытое (soft delete). Доступно только
+        администраторам
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Устройство успешно скрыто
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректный ID устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (требуется роль Admin)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при удалении устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить устройство
+      tags:
+      - Устройства
+  /api/device/:id/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает или заменяет изображение для устройства. Доступно только
+        администраторам
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Изображение устройства
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Изображение успешно загружено
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректный ID или отсутствует файл изображения
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (требуется роль Admin)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при загрузке изображения
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Загрузить изображение устройства
+      tags:
+      - Устройства
+  /api/devices:
+    get:
+      description: Возвращает список всех устройств с возможностью фильтрации по названию
+      parameters:
+      - description: Фильтр по названию устройства
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком устройств
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка на сервере
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список устройств
+      tags:
+      - Устройства
+  /api/emissions_calculation:
+    get:
+      consumes:
+      - application/json
+      description: 'Возвращает список заказов с возможностью фильтрации по статусу
+        и диапазону дат. Разрешённые статусы: "сформирован", "завершен", "отклонен".'
+      parameters:
+      - description: Статус заказа (сформирован, завершен, отклонен), можно указать
+          несколько через запятую
+        in: query
+        name: status
+        type: string
+      - description: Дата начала фильтрации (формат YYYY-MM-DD)
+        in: query
+        name: start
+        type: string
+      - description: Дата окончания фильтрации (формат YYYY-MM-DD)
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком заказов
+          schema:
+            $ref: '#/definitions/ds.EmissionListResponse'
+        "500":
+          description: Ошибка на сервере
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить список заказов
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/:id:
+    get:
+      description: Возвращает полную информацию о заказе с расчетом выбросов, включая
+        список устройств. Доступен только владельцу заказа или администратору
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными заказа и устройств
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (не владелец и не администратор)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Заказ не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить заказ с устройствами
+      tags:
+      - Заявки с устройствами
+    put:
+      consumes:
+      - application/json
+      description: Обновляет параметры заказа (например, расстояние). Разрешено обновлять
+        только поле distance
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления заказа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.EmissionUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно обновлен
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID или недопустимые поля в запросе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при обновлении заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить заказ
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/:id/complete:
+    put:
+      consumes:
+      - application/json
+      description: Переводит заказ в статус "завершен" или "отклонен". Доступно только
+        администраторам
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для завершения/отклонения заказа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.EmissionCompleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно обновлен
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID или данные запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (требуется роль Admin)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при обновлении заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Завершить или отклонить заказ
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/:id/form:
+    put:
+      description: Переводит черновой заказ в статус "сформирован". Требуется, чтобы
+        все устройства имели заполненное поле custom_power
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно сформирован
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID заказа или не все custom_power заполнены
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при формировании заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Сформировать заказ
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/:order_id/device/:material_id:
+    delete:
+      description: Удаляет устройство из расчета выбросов по ID заказа и ID устройства
+      parameters:
+      - description: ID заказа
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      - description: ID устройства (material_id)
+        in: path
+        name: material_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Устройство успешно удалено из расчета
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID заказа или устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при удалении устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить устройство из заказа
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/delete/:id:
+    post:
+      description: Помечает заказ как удаленный (soft delete), устанавливая статус
+        "удален"
+      parameters:
+      - description: ID заказа
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Заказ успешно удален
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при удалении заказа
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Удалить заказ
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/devices/:order_id/:material_id/custom_power:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет значение пользовательской мощности (custom_power) для
+        устройства в заказе
+      parameters:
+      - description: ID заказа
+        in: path
+        name: order_id
+        required: true
+        type: integer
+      - description: ID устройства (material_id)
+        in: path
+        name: material_id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Мощность успешно обновлена
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID или тело запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при обновлении мощности
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить пользовательскую мощность устройства
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/draft/add/:id:
+    post:
+      description: Добавляет устройство в черновой заказ пользователя. Если чернового
+        заказа нет, создает новый
+      parameters:
+      - description: ID устройства
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Устройство успешно добавлено в черновой заказ
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при добавлении устройства
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Добавить устройство в черновой заказ
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/draft/cart:
+    get:
+      description: 'Возвращает информацию о черновом заказе пользователя: ID заказа
+        и количество устройств в нем'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными корзины
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Ошибка на сервере
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить корзину чернового заказа
+      tags:
+      - Заявки с устройствами
+  /api/emissions_calculation/user:
+    get:
+      consumes:
+      - application/json
+      description: 'Возвращает список заказов с возможностью фильтрации по статусу
+        и диапазону дат. Разрешённые статусы: "сформирован", "завершен", "отклонен".'
+      parameters:
+      - description: Статус заказа (сформирован, завершен, отклонен), можно указать
+          несколько через запятую
+        in: query
+        name: status
+        type: string
+      - description: Дата начала фильтрации (формат YYYY-MM-DD)
+        in: query
+        name: start
+        type: string
+      - description: Дата окончания фильтрации (формат YYYY-MM-DD)
+        in: query
+        name: end
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ со списком заказов
+          schema:
+            $ref: '#/definitions/ds.EmissionListResponse'
+        "500":
+          description: Ошибка на сервере
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить список заказов
+      tags:
+      - Заявки с устройствами
+  /api/users/:id:
+    get:
+      description: Возвращает информацию о пользователе по его ID (логин и роль)
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными пользователя
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Некорректный ID пользователя
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Получить информацию о пользователе
+      tags:
+      - Управление пользователями
+    put:
+      consumes:
+      - application/json
+      description: Обновляет логин и/или пароль пользователя по его ID
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: request
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно обновлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Некорректный ID или тело запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Ошибка при обновлении пользователя
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Обновить данные пользователя
+      tags:
+      - Управление пользователями
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизует пользователя по логину и паролю, возвращает JWT-токен
+        и время жизни
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/ds.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.LoginResponse'
+        "400":
+          description: Неверный формат запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Пользователь не найден или неверный пароль
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /api/users/logout:
+    post:
+      description: Добавляет JWT-токен в черный список (блеклист) Redis, чтобы он
+        стал недействительным
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный выход
+        "400":
+          description: Некорректный токен
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+        "500":
+          description: Ошибка при записи токена в блеклист
+          schema:
+            $ref: '#/definitions/ds.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Деаутентификация пользователя
+      tags:
+      - auth
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
